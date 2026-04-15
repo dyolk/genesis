@@ -1,0 +1,414 @@
+
+<!-- saved from url=(0030)https://phus.lu/autoindex.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script>
+!function(){
+	website_title = ''
+	max_name_length = 60
+	enable_readme = true
+	omit_icon_if_emoji = true
+	datetime_format = '%d-%b-%Y %H:%M'
+
+	var dom = {
+		element: null,
+		get: function (o) {
+			var obj = Object.create(this)
+			obj.element = (typeof o == "object") ? o : document.createElement(o)
+			return obj
+		},
+		add: function (o) {
+			var obj = dom.get(o)
+			this.element.appendChild(obj.element)
+			return obj
+		},
+		text: function (t) {
+			this.element.appendChild(document.createTextNode(t))
+			return this
+		},
+		html: function (s) {
+			this.element.innerHTML = s
+			return this
+		},
+		attr: function (k, v) {
+			this.element.setAttribute(k, v)
+			return this
+		}
+	}
+
+	head = dom.get(document.head)
+	head.add('link').attr('rel', 'manifest').attr('href', '/manifest.json')
+	head.add('meta').attr('charset', 'utf-8')
+	head.add('meta').attr('charset', 'utf-8')
+	head.add('meta').attr('name', 'viewport').attr('content', 'width=device-width,initial-scale=1')
+
+
+	var bodylines = document.body.innerHTML.split('\n')
+	document.body.innerHTML = ''
+
+	titlehtml = document.title.replace(/\/$/, '').split('/').slice(1).reduce(function(acc, v, i, a) {
+		return acc + '<a href="/' + a.slice(0, i+1).join('/') + '/">' + v + '</a>/'
+	}, '<a href="/">FS/</a>')
+	if (website_title) {
+		document.title = website_title + ' - File Server'
+	} else {
+		document.title = 'File Server'
+	}
+	head.add('meta').attr('name', 'description').attr('content', document.title)
+
+	columns = ['Name', 'Date', 'Size']
+	
+	div = dom.get('div').attr('class', 'container')
+	div.add('h1').attr('class', 'page-title').html(titlehtml)
+	table = div.add('table').attr('class', 'file-list')
+	thead = table.add('thead').add('tr')
+	for (i = 0; i < columns.length; i++)
+		thead.add('th').add('a').attr('href', 'javascript:sortby('+i+')').html(columns[i] + '<svg class="sort-icon" viewBox="0 0 10 10"><path d="M5 3L8 7H2L5 3Z" fill="currentColor"/></svg>');
+	tbody = table.add('tbody')
+
+	var insert = function(filename, datetime, size) {
+		var iconSvg = '';
+		if (/\/$/.test(filename) || filename == '../') {
+			css = 'file-directory';
+			iconSvg = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z"></path></svg>';
+		} else {
+			css = 'file';
+			iconSvg = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"></path></svg>';
+		}
+
+		displayname = decodeURIComponent(filename.replace(/\/$/, ''))
+		if (displayname.length > max_name_length)
+			displayname = displayname.substring(0, max_name_length-3) + '..>';
+
+		if (!isNaN(Date.parse(datetime))) {
+			d = new Date(datetime)
+			pad = function (s) {return s < 10 ? '0' + s : s}
+			mon = function (m) {return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m]}
+			datetime = datetime_format
+					.replace('%Y', d.getFullYear())
+					.replace('%m', pad(d.getMonth()+1))
+					.replace('%d', pad(d.getDate()))
+					.replace('%H', pad(d.getHours()))
+					.replace('%M', pad(d.getMinutes()))
+					.replace('%S', pad(d.getSeconds()))
+					.replace('%b', mon(d.getMonth()))
+		}
+
+		tr = tbody.add('tr')
+		tr.add('td').add('a').attr('class', css).attr('href', filename).html(iconSvg + displayname)
+		tr.add('td').text(datetime)
+		tr.add('td').text(size == '-' ? '' : size)
+	}
+
+	var readme_md = ''
+	var readme_js = ''
+	insert('../', '', '-')
+	for (var i in bodylines) {
+		if (m = /\s*<a href="(.+?)">(.+?)<\/a>\s+(\S+)\s+(\S+)\s+(\S+)\s*/.exec(bodylines[i])) {
+			filename = decodeURIComponent(m[1])
+			datetime = m[3] + ' ' + m[4]
+			size = m[5]
+			switch (filename.toLowerCase()) {
+			  case 'readme.md':
+			    readme_md = filename
+			    break;
+			  case 'readme.js':
+			    readme_js = filename
+			    break;
+			}
+
+			insert(filename, datetime, size)
+		}
+	}
+
+	document.documentElement.lang = navigator.language
+	document.body.appendChild(div.element)
+
+	if (enable_readme && readme_md !== '') {
+		xhr = new XMLHttpRequest()
+		xhr.open('GET', location.pathname.replace(/[^/]+$/, '')+readme_md, true)
+		xhr.onload = function() {
+			if (xhr.status < 200 && xhr.status >= 400)
+				return
+			wait('marked', function() {
+				text = xhr.responseText
+				begin = text.indexOf('<!--<script>')
+				end = text.indexOf("\n</" + "script>-->")
+				if (begin != 0) {
+					readme = div.add('div').attr('class', 'markdown-body');
+					readme.add('h3').text(readme_md);
+					readme.add('div').attr('id', 'readme').html(marked.parse(text));
+				}
+				if (begin < end)
+					div.add('script').html(text.substr(begin+4+8, end+1-begin-4-8))
+			})
+		}
+		xhr.send()
+
+		div.add('script').attr('src', 'https://cdnjs.cloudflare.com/ajax/libs/marked/0.5.2/marked.min.js').attr('integrity', 'sha256-zFUosuESzULu5P+SZdjRRtBZR8+1u5RZDlbt3Q5KL8U=').attr('crossorigin', 'anonymous')
+		div.add('link').attr('rel', 'stylesheet').attr('href', 'https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown-light.min.css').attr('integrity', 'sha256-WQx0Y6LLZeGv3V3NVVge+YIL5MIOt45RPuFdkyNodls=').attr('crossorigin', 'anonymous')
+	}
+	if (enable_readme && readme_js !== '') {
+		div.add('script').attr('src', readme_js)
+	}
+}()
+
+function wait(name, callback) {
+	var interval = 10; // ms
+	window.setTimeout(function() {
+		if (window[name] && !(window[name] instanceof HTMLElement)) {
+			callback(window[name])
+		} else if (window[name] instanceof HTMLElement && window[name].innerHTML) {
+			callback(window[name])
+		} else {
+			window.setTimeout(arguments.callee, interval)
+		}
+	}, interval)
+}
+
+function sortby(index) {
+	var tableEl = document.getElementsByClassName('file-list')[0];
+	var rows = tableEl.querySelectorAll('tbody tr');
+	var headerCells = tableEl.querySelectorAll('thead th');
+	var link = headerCells[index].querySelector('a');
+	var isDesc = link.getAttribute('data-sort') === 'desc';
+	link.setAttribute('data-sort', isDesc ? 'asc' : 'desc');
+	
+	var sortedRows = Array.from(rows).map(function (row, i) {
+		var firstLink = row.querySelector('td:first-child a');
+		var type = firstLink && firstLink.classList.contains('file-directory') ? 0 : 1;
+		var text = row.querySelectorAll('td')[index].innerText;
+		var value;
+		if (index === 0) {
+			value = firstLink.textContent.trim();
+		} else if (index === 1) {
+			value = new Date(text).getTime();
+		} else if (index === 2) {
+			var m = {'G':1024*1024*1024, 'M':1024*1024, 'K':1024};
+			value = parseInt(text || 0) * (m[text[text.search(/[KMG]B?$/)]] || 1);
+		}
+		return {type: type, value: value, index: i, html: row.innerHTML};
+	}).sort(function (a, b) {
+		if (a.type != b.type)
+			return a.type - b.type;
+		if (a.value != b.value)
+			return isDesc ? (a.value < b.value ? 1 : -1) : (a.value < b.value ? -1 : 1);
+		return a.index < b.index ? -1 : 1;
+	});
+	
+	sortedRows.forEach(function (e, i) {
+		rows[i].innerHTML = e.html;
+	});
+}
+</script><link rel="manifest" href="https://phus.lu/manifest.json"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><div class="container">
+</div>
+
+<style>
+:root {
+	--font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+	--font-mono: "SF Mono", "Monaco", "Menlo", "Consolas", monospace;
+	--color-link: #0066cc;
+	--color-link-hover: #004499;
+	--color-text: #1d1d1f;
+	--color-text-secondary: #86868b;
+	--color-bg: #ffffff;
+	--color-hover: rgba(0,0,0,0.04);
+	--color-border: rgba(0,0,0,0.08);
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+	font-family: var(--font-stack);
+	font-size: 17px;
+	line-height: 1.4;
+	color: var(--color-text);
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	background: var(--color-bg);
+}
+
+.container {
+	max-width: 960px;
+	margin: 0 auto;
+	padding: 72px 24px 120px;
+}
+
+.page-title {
+	font-size: 56px;
+	font-weight: 700;
+	line-height: 1.07;
+	letter-spacing: -0.005em;
+	margin: 0 0 32px;
+	padding: 0 20px;
+}
+
+.page-title a {
+	color: var(--color-text);
+	text-decoration: none;
+}
+
+.page-title a:hover {
+	color: var(--color-link);
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+	background: transparent;
+}
+
+thead tr {
+	background: transparent;
+}
+
+th {
+	font-size: 21px;
+	font-weight: 600;
+	padding: 0 20px 12px;
+	text-align: left;
+	border: none;
+}
+
+th a {
+	color: var(--color-text);
+	text-decoration: none;
+	font-weight: 600;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+th a:hover {
+	color: var(--color-link);
+}
+
+td {
+	padding: 14px 20px;
+	font-size: 15px;
+	border-bottom: 1px solid var(--color-border);
+}
+
+td:first-child {
+	font-weight: 400;
+}
+
+tr:last-child td {
+	border-bottom: none;
+}
+
+.file-list tr:hover td {
+	background: var(--color-hover);
+}
+
+.file-list tr td:first-child a {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+}
+
+a {
+	color: var(--color-link);
+	text-decoration: none;
+}
+
+a:hover {
+	color: var(--color-link-hover);
+	text-decoration: underline;
+}
+
+.icon {
+	width: 20px;
+	height: 20px;
+	flex-shrink: 0;
+}
+
+.file-directory .icon {
+	color: #0071e3;
+}
+
+.file .icon {
+	color: #86868b;
+}
+
+.sort-icon {
+	width: 10px;
+	height: 10px;
+	opacity: 0.4;
+}
+
+.markdown-body {
+	margin-top: 32px;
+	padding: 40px;
+	background: #fbfbfd;
+	border-radius: 20px;
+	font-size: 15px;
+	line-height: 1.6;
+}
+
+.markdown-body h1 { font-size: 30px; font-weight: 700; margin: 1.2em 0 0.6em; }
+.markdown-body h2 { font-size: 24px; font-weight: 700; margin: 1em 0 0.5em; }
+.markdown-body h3 { font-size: 20px; font-weight: 600; margin: 1em 0 0.5em; }
+.markdown-body p { margin: 0 0 1em; }
+.markdown-body a { color: var(--color-link); }
+.markdown-body code {
+	font-family: var(--font-mono);
+	font-size: 13px;
+	background: rgba(0,0,0,0.06);
+	padding: 0.2em 0.4em;
+	border-radius: 4px;
+}
+.markdown-body pre {
+	background: #f5f5f7;
+	border-radius: 12px;
+	padding: 20px;
+	overflow-x: auto;
+	margin: 1em 0;
+}
+.markdown-body pre code {
+	background: none;
+	padding: 0;
+}
+.markdown-body ul, .markdown-body ol { padding-left: 1.5em; margin: 0 0 1em; }
+.markdown-body li { margin: 0.3em 0; }
+.markdown-body blockquote {
+	margin: 1em 0;
+	padding-left: 16px;
+	border-left: 3px solid #d1d1d6;
+	color: var(--color-text-secondary);
+}
+.markdown-body img { max-width: 100%; border-radius: 12px; }
+.markdown-body table { width: 100%; border-collapse: collapse; margin: 1em 0; }
+.markdown-body th, .markdown-body td { padding: 10px 14px; border: 1px solid #d1d1d6; }
+.markdown-body th { background: #f5f5f7; font-weight: 600; }
+
+@media (max-width: 768px) {
+	.container { padding: 40px 16px 60px; }
+	.page-title { font-size: 36px; padding: 0 16px; }
+	th, td { padding: 12px 16px; }
+	.markdown-body { padding: 24px; }
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-link: #0a84ff;
+		--color-link-hover: #409cff;
+		--color-text: #f5f5f7;
+		--color-text-secondary: #98989d;
+		--color-bg: #000000;
+		--color-hover: rgba(255,255,255,0.08);
+		--color-border: rgba(255,255,255,0.12);
+	}
+	.file-directory .icon { color: #0a84ff; }
+	.file .icon { color: #98989d; }
+	.markdown-body { background: #1c1c1e; }
+	.markdown-body code { background: rgba(255,255,255,0.1); }
+	.markdown-body pre { background: #2c2c2e; }
+	.markdown-body blockquote { border-color: #48484a; }
+	.markdown-body th, .markdown-body td { border-color: #48484a; }
+	.markdown-body th { background: #2c2c2e; }
+}
+</style>
+</body></html>
