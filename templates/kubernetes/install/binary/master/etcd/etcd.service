@@ -1,0 +1,19 @@
+[Unit]
+Description=etcd high-available key value store
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+User=root
+Group=root
+EnvironmentFile=/etc/etcd/etcd.cnf
+ExecStart=/usr/local/bin/etcd
+ExecReload=/bin/kill --signal HUP $MAINPID
+KillMode=process
+KillSignal=SIGTERM
+Restart=on-failure
+LimitNOFILE=65536
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

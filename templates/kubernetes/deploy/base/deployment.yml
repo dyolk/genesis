@@ -1,0 +1,14 @@
+
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  labels:
+    app.kubernetes.io/name: web-demo
+    app.kubernetes.io/version: 0.0.1
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/managed-by: kubectl
+
+    k8s.dyolk.com/team: devops
+    k8s.dyolk.com/cost-center: aliyun
+    k8s.dyolk.com/env: production

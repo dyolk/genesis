@@ -1,0 +1,7 @@
+.idea/
+.github/
+.gitea/
+
+.dockerignore
+docker-compose.yml
+Dockerfile

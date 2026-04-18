@@ -1,0 +1,17 @@
+UBE_API_ARGS=" \
+--secure-port=6443 \
+--tls-cert-file=/etc/kubernetes/pki/apiserver.crt \
+--tls-private-key-file=/etc/kubernetes/pki/apiserver.key \
+--client-ca-file=/etc/kubernetes/pki/k8s-ca.crt \
+--apiserver-count=3 --endpoint-reconciler-type=master-count \
+--etcd-servers=https://172.26.206.250:2379,https://172.26.206.251:2379,https://172.26.206.253:2379 \
+--etcd-cafile=/etc/kubernetes/pki/k8s-ca.crt \
+--etcd-certfile=/etc/etcd/pki/etcd-client.crt \
+--etcd-keyfile=/etc/etcd/pki/etcd-client.key \
+--service-cluster-ip-range=169.169.0.0/16 \
+--service-node-port-range=30000-32767 \
+--allow-privileged=true \
+"
+--service-account-issuer=https://kubernetes.default.svc.cluster.local \
+--service-account-signing-key-file=/etc/kubernetes/pki/apiserver.key \
+--service-account-key-file=/etc/kubernetes/pki/apiserver.key \

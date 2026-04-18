@@ -1,0 +1,7 @@
+KUBE_CONTROLLER_MANAGER_ARGS="\
+--kubeconfig=/etc/kubernetes/kubeconfig \
+--leader-elect=true \
+--service-cluster-ip-range=169.169.0.0/16 \
+--service-account-private-key-file=/etc/kubernetes/pki/apiserver.key \
+--root-ca-file=/etc/kubernetes/pki/k8s-ca.crt \
+"
