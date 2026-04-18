@@ -1,0 +1,11 @@
+[Unit]
+Description=Kubernetes Scheduler
+Documentation=https://github.com/kubernetes/kubenetes
+
+[Service]
+EnvironmentFile=/etc/kubernetes/scheduler
+ExecStart=/usr/bin/kube-scheduler $KUBE_SCHEDULER_ARGS
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

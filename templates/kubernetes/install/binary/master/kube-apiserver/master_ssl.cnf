@@ -1,0 +1,23 @@
+[req]
+req_extensions = v3_req
+distinguished_name = req_distinguished_name
+[req_distinguished_name]
+
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName = @alt_name
+
+[alt_name]
+DNS.1 = kubernetes
+DNS.2 = kubernetes.default
+DNS.3 = kubernetes.default.svc
+DNS.4 = kubernetes.default.svc.cluster.local
+DNS.5 = k8s-master-01
+DNS.7 = k8s-master-02
+DNS.8 = k8s-master-03
+IP.1 = 169.169.0.1
+IP.2 = 172.26.206.250
+IP.3 = 172.26.206.251
+IP.4 = 172.26.206.253
+IP.5 = 172.26.206.252

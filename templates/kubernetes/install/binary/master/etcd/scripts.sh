@@ -1,7 +1,7 @@
 # 生成 k8s 根证书
 openssl genrsa -out k8s-ca.key 4096
 
-openssl req -x509 -new -nodes -key k8s-ca.key -subj "/C=CN/ST=Suzhou/L=Jiangsu/O=D yolk/CN=k8s-ca" -days 3650 -out k8s-ca.crt
+openssl req -x509 -new -nodes -key k8s-ca.key -subj "/C=CN/ST=Suzhou/L=Jiangsu/O=Dyolk/CN=k8s-ca" -days 3650 -out k8s-ca.crt
 
 # 生成 etcd-server etcd-client 证书
 
