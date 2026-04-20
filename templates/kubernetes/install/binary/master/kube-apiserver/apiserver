@@ -1,5 +1,4 @@
-UBE_API_ARGS=" \
---secure-port=6443 \
+KUBE_API_ARGS="--secure-port=6443 \
 --tls-cert-file=/etc/kubernetes/pki/apiserver.crt \
 --tls-private-key-file=/etc/kubernetes/pki/apiserver.key \
 --client-ca-file=/etc/kubernetes/pki/k8s-ca.crt \
@@ -11,7 +10,6 @@ UBE_API_ARGS=" \
 --service-cluster-ip-range=169.169.0.0/16 \
 --service-node-port-range=30000-32767 \
 --allow-privileged=true \
-"
 --service-account-issuer=https://kubernetes.default.svc.cluster.local \
 --service-account-signing-key-file=/etc/kubernetes/pki/apiserver.key \
---service-account-key-file=/etc/kubernetes/pki/apiserver.key \
+--service-account-key-file=/etc/kubernetes/pki/apiserver.key "
