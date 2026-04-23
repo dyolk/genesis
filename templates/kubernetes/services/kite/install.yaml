@@ -17,6 +17,14 @@ metadata:
   name: kite
   namespace: kube-system
 ---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: kite-env
+  namespace: kube-system
+data:
+  DB_DSN: "/data/db.sqlite"
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -42,6 +50,9 @@ spec:
         - image: docker.1ms.run/kite-org/kite:latest
           imagePullPolicy: IfNotPresent
           name: kite
+          envFrom:
+            - configMapRef:
+                name: kite-env
           resources:
             limits:
               cpu: 1000m
