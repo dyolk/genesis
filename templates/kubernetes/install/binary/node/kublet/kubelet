@@ -1,0 +1,3 @@
+KUBELET_ARGS="--kubeconfig=/etc/kubernetes/kubeconfig \
+--config=/etc/kubernetes/kubelet.config \
+--hostname-override=k8s-node-01"

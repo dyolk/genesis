@@ -1,0 +1,12 @@
+[Unit]
+Description=Kubernetes Kubelet Service
+Documentation=https://github.com/kubernetes/kubernetes
+After=docker.target
+
+[Service]
+EnvironmentFile=/etc/kubernetes/kubelet
+ExecStart=/usr/local/bin/kubelet $KUBELET_ARGS
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
